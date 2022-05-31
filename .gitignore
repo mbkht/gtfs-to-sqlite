@@ -1,0 +1,11 @@
+.idea
+/sql_queries/
+/site-packages/
+/gtfs_to_sqlite.egg-info/
+/gtfs_to_sqlite/_trial_temp/
+/gtfs_to_sqlite/scripts/kt_files/
+/gtfs_to_sqlite/scripts/reference.json
+
+venv
+gtfs.db
+gtfs.zip
