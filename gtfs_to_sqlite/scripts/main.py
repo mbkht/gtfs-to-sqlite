@@ -5,6 +5,8 @@ import sqlite3
 import sys
 import tempfile
 import zipfile
+import traceback
+import json
 from pathlib import Path
 
 import click
@@ -101,7 +103,7 @@ def parse_files(directory):
 
 
 # noinspection PyTypeChecker
-def create_database_from_gtfs(input_file, output_file, reference_path=None):
+def create_database_from_gtfs(input_file, output_file, reference_path=None, export_to_json=None):
     # Create the database, if it already exists, deletes it
     if os.path.exists(output_file):
         os.remove(output_file)
@@ -117,9 +119,16 @@ def create_database_from_gtfs(input_file, output_file, reference_path=None):
             # Google's website.
             database: Database = Database()
             if reference_path:
+                print("test")
                 database = database.from_JSON(reference_path)
             else:
                 database = parse_reference()
+            if export_to_json:
+                with open(output_file, 'w') as f:
+                    json.dump(database.to_JSON(), f)
+                con.close()
+                sys.exit(0)
+
             for filename, file in parsed_files_list.items():
                 corrected_csv = correct_csv(filename, file, database)
                 reference_table = database.tables[filename]
@@ -130,7 +139,7 @@ def create_database_from_gtfs(input_file, output_file, reference_path=None):
             database = database.from_JSON(reference_path)
             database.export_to_room()
     except Exception as e:
-        click.echo(str(e))
+        click.echo(traceback.format_exc())
         con.close()
         os.remove(output_file)
         sys.exit(1)
@@ -139,11 +148,14 @@ def create_database_from_gtfs(input_file, output_file, reference_path=None):
 @click.command()
 @click.argument('input_file', type=click.Path(exists=True))
 @click.argument('output_file', type=click.Path(exists=False))
-@click.option('-r', '--reference', 'reference_path', help='Path to reference file in json format')
-def cli(input_file, output_file, reference_path):
+@click.option('-r', '--reference', 'reference_path', help='Path to a json reference file')
+@click.option('-e', '--export', 'export_to_json', help='export the reference as a json file', is_flag = True)
+def cli(input_file, output_file, reference_path, export_to_json):
+    if export_to_json:
+        create_database_from_gtfs(click.format_filename(input_file), click.format_filename(output_file), export_to_json=export_to_json)
     if reference_path:
         create_database_from_gtfs(click.format_filename(input_file), click.format_filename(output_file),
-                                  reference_path)
+                                  reference_path=reference_path)
     else:
         create_database_from_gtfs(click.format_filename(input_file), click.format_filename(output_file))
 

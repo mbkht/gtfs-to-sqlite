@@ -87,7 +87,7 @@ class Database:
     # Export the database to JSON
     def to_JSON(self):
         return json.dumps(self, default=lambda o: o.__dict__,
-                          sort_keys=True, indent=4, separators=(',', ': '))
+                          sort_keys=True)
 
     # Export the database to Android Room Entities
     def export_to_room(self):
