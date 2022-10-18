@@ -4,7 +4,7 @@ import pathlib
 import re
 
 from caseconverter import camelcase, pascalcase
-from utils import get_kotlin_type
+from gtfs_to_sqlite.utils import get_kotlin_type
 
 
 def parse_column_type(column_type: str):
