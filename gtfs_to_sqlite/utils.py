@@ -3,7 +3,7 @@ def get_kotlin_type(column_type: str, is_not_null):
     kotlin_type = "String"
     match column_type:
         case "INTEGER":
-            kotlin_type = "Integer"
+            kotlin_type = "Int"
         case "REAL":
             kotlin_type = "Double"
 

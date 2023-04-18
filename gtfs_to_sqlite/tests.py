@@ -1,11 +1,15 @@
 import unittest
 import gtfs_reference_parser
+from database import Database
 
 
 class TestDatabase(unittest.TestCase):
 
     def setUp(self):
         self.reference_database = gtfs_reference_parser.parse_reference()
+
+    def test_parse_reference(self):
+        self.assertEqual(type(self.reference_database).__name__, Database.__name__)
 
     def test_table_count(self):
         self.assertEqual(len(self.reference_database.tables), 15)
@@ -46,6 +50,7 @@ class TestDatabase(unittest.TestCase):
 
         for column, column_name in zip(reference_trips_table_columns, test_trips_table_columns):
             self.assertEqual(column.column_name, column_name)
+
 
 if __name__ == '__main__':
     unittest.main()

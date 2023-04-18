@@ -7,12 +7,12 @@ from gtfs_to_sqlite.database import Column, Table, Database
 
 
 def parse_reference():
-    URL = "https://developers.google.com/transit/gtfs/reference"
-    page = requests.get(URL)
+    url = "https://developers.google.com/transit/gtfs/reference"
+    page = requests.get(url)
 
-    soupe = BeautifulSoup(page.content, 'html.parser')
+    soup = BeautifulSoup(page.content, 'html.parser')
 
-    table_headings = soupe.select('h3[id]')
+    table_headings = soup.select('h3[id]')
 
     # manually remove unnecessary tables
     table_headings.pop()
@@ -23,7 +23,7 @@ def parse_reference():
     for i in range(len(table_headings)):
         table_names.append(re.sub('(.*?)\.txt', '\g<1>', table_headings[i].text))
 
-    tables = soupe.select('table > tbody')
+    tables = soup.select('table > tbody')
 
     # remove manually unnecessary tables
     tables.pop(0)
@@ -36,14 +36,15 @@ def parse_reference():
     final_tables: dict[str, Table] = {}
 
     for i in range(len(tables)):
-        columns: list[Column] = []
+        columns: dict[str, Column] = {}
         rows = tables[i].findAll('tr')
         for row in rows:
             tds = row.findAll('td')
             column_name = tds[0].text
             column_type = tds[1].text
             requirement = tds[2].text
-            columns.append(Column(column_name=column_name, column_type=column_type, requirement=requirement))
+            column_name = re.sub('^stop_id$', 'rowid', column_name)
+            columns[column_name] = Column(column_name=column_name, column_type=column_type, requirement=requirement)
         final_tables[table_names[i]] = Table(table_names[i], columns)
 
     return Database("gtfs", final_tables)

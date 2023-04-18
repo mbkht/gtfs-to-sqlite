@@ -20,8 +20,8 @@ from gtfs_to_sqlite.gtfs_reference_parser import parse_reference
 
 def create_insert_statement(reference_table, rows):
     column_strings = []
-    for column in reference_table.columns:
-        column_strings.append(column.column_name)
+    for key in reference_table.columns:
+        column_strings.append(reference_table.columns[key].column_name)
     final_statement = "INSERT INTO {}(`{}`) VALUES ({}{})".format(
         reference_table.table_name,
         "`, `".join(column_strings),
@@ -46,7 +46,7 @@ def correct_csv(filename: str, csv_file: DataFrame, reference_database: Database
         raise Exception("Table doesn't exist")
 
     # Get the reference table columns
-    reference_columns: list[Column] = reference_table.columns
+    reference_columns: dict[str, Column] = reference_table.columns
 
     # rename stop_id to rowid to use Android Room FTS
     csv_file = csv_file.rename(
@@ -55,19 +55,19 @@ def correct_csv(filename: str, csv_file: DataFrame, reference_database: Database
     # check if csv file has all reference columns
     fixed_header_list = csv_file.keys()  # fixed header list because we delete items in the loop
     for column in fixed_header_list:
-        if not any(column in reference_column.column_name for reference_column in reference_columns):
+        if not any(column in reference_columns[key].column_name for key in reference_columns):
             csv_file = csv_file.drop(column, axis=1)
 
     # test reference column in csv header
-    for reference_column in reference_columns:
-        if not any(reference_column.column_name in csv_column for csv_column in csv_file.keys()):
+    for key in reference_columns:
+        if not any(reference_columns[key].column_name in csv_column for csv_column in csv_file.keys()):
             # Add empty column
-            csv_file[reference_column.column_name] = np.NAN
+            csv_file[reference_columns[key].column_name] = np.NAN
 
     # Columns list in correct order
     columns_list = []
-    for reference_column in reference_columns:
-        columns_list.append(reference_column.column_name)
+    for key in reference_columns:
+        columns_list.append(reference_columns[key].column_name)
 
     # reorder columns
     csv_file = csv_file.reindex(columns=columns_list)
@@ -87,8 +87,9 @@ def correct_csv(filename: str, csv_file: DataFrame, reference_database: Database
 
 
 def parse_csv(csv_filename):
-    with open(csv_filename, newline='') as csv_file:
-        return pandas.read_csv(csv_file)
+    with open(csv_filename, newline='', encoding='utf-8') as csv_file:
+        print(csv_file)
+        return pandas.read_csv(csv_file, encoding='utf-8')
 
 
 def parse_files(directory):
@@ -119,10 +120,10 @@ def create_database_from_gtfs(input_file, output_file, reference_path=None, expo
             # Google's website.
             database: Database = Database()
             if reference_path:
-                print("test")
                 database = database.from_JSON(reference_path)
             else:
                 database = parse_reference()
+                database.export_to_room()
             if export_to_json:
                 with open(output_file, 'w') as f:
                     json.dump(database.to_JSON(), f)
@@ -133,12 +134,13 @@ def create_database_from_gtfs(input_file, output_file, reference_path=None, expo
                 corrected_csv = correct_csv(filename, file, database)
                 reference_table = database.tables[filename]
                 build_database(cur, reference_table, corrected_csv)
+
         con.commit()
         con.close()
         if reference_path:
             database = database.from_JSON(reference_path)
             database.export_to_room()
-    except Exception as e:
+    except Exception:
         click.echo(traceback.format_exc())
         con.close()
         os.remove(output_file)
@@ -160,11 +162,11 @@ def cli(input_file, output_file, reference_path, export_to_json):
         create_database_from_gtfs(click.format_filename(input_file), click.format_filename(output_file))
 
 
+
 if __name__ == '__main__':
     pandas.set_option('display.width', None)
     pandas.set_option('display.max_columns', None)
     cli([
-        "-r" + str(pathlib.Path("reference.json")),
         str(pathlib.Path("../../gtfs.zip")),
         str(pathlib.Path("../../gtfs.db"))
     ])
