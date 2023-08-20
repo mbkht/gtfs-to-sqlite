@@ -1,11 +1,11 @@
 import unittest
-import gtfs_reference_parser
+import gtfstosqlite.gtfs_reference_parser
 
 
-class TestDatabase(unittest.TestCase):
+class TestGTFSDataSchema(unittest.TestCase):
 
     def setUp(self):
-        self.reference_database = gtfs_reference_parser.parse_reference()
+        self.reference_database = gtfstosqlite.gtfs_reference_parser.parse_reference()
 
     def test_table_count(self):
         self.assertEqual(len(self.reference_database.tables), 15)
@@ -46,6 +46,7 @@ class TestDatabase(unittest.TestCase):
 
         for column, column_name in zip(reference_trips_table_columns, test_trips_table_columns):
             self.assertEqual(column.column_name, column_name)
+
 
 if __name__ == '__main__':
     unittest.main()
