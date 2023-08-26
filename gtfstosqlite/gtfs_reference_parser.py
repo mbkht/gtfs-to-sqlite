@@ -3,10 +3,18 @@ import re
 import requests
 from bs4 import BeautifulSoup
 
-from gtfs_to_sqlite.database import Column, Table, Database
+from gtfstosqlite.gtfs_data_schema import Column, Table, GTFSDataSchema
 
 
 def parse_reference():
+    """
+    Parses the Google GTFS reference documentation page to generate a structured representation of GTFS tables and
+    columns.
+
+        Returns:
+            GTFSDataSchema: A Database object containing structured information about GTFS tables and columns.
+        """
+
     URL = "https://developers.google.com/transit/gtfs/reference"
     page = requests.get(URL)
 
@@ -14,7 +22,7 @@ def parse_reference():
 
     table_headings = soupe.select('h3[id]')
 
-    # manually remove unnecessary tables
+    # manually remove unnecessary tables (the first one are overviews)
     table_headings.pop()
     table_headings.pop()
 
@@ -25,7 +33,7 @@ def parse_reference():
 
     tables = soupe.select('table > tbody')
 
-    # remove manually unnecessary tables
+    # remove manually unnecessary tables (examples...)
     tables.pop(0)
     tables.pop(4)
     tables.pop()
@@ -35,6 +43,7 @@ def parse_reference():
 
     final_tables: dict[str, Table] = {}
 
+    # Creation of the structured Data structure
     for i in range(len(tables)):
         columns: list[Column] = []
         rows = tables[i].findAll('tr')
@@ -46,4 +55,4 @@ def parse_reference():
             columns.append(Column(column_name=column_name, column_type=column_type, requirement=requirement))
         final_tables[table_names[i]] = Table(table_names[i], columns)
 
-    return Database("gtfs", final_tables)
+    return GTFSDataSchema("gtfs", final_tables)
