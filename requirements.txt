@@ -8,7 +8,7 @@ lxml~=4.9.2
 soupsieve==2.4.1
 pip==23.2.1
 wheel~=0.40.0
-cryptography==40.0.2
+cryptography==41.0.4
 cssselect==1.2.0
 pytz==2023.3
 attrs==23.1.0
