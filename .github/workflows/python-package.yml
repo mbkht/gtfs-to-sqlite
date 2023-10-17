@@ -37,6 +37,7 @@ jobs:
 
     # Check if the artifact already exists
     - name: Check if artifact exists
+      id: check_artifact
       uses: rexdefuror/check_artifact_exists@v1.0.1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
