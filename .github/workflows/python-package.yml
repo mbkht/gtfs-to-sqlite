@@ -44,7 +44,7 @@ jobs:
         repo: 'gtfs-to-sqlite'
         name: 'gtfs-data' ## without extension
         
-    - run: echo "exists - ${{ env.ARTIFACT_EXISTS }}"
+    - run: echo "${{ env.ARTIFACT_EXISTS }}"
 
     # Download the file if artifact does not exist
     - name: Download gtfs.zip (if artifact doesn't exist)
