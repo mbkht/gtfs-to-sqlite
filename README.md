@@ -1,3 +1,4 @@
+![gtfs-to-sqlite](https://github.com/mbkht/gtfs-to-sqlite/actions/workflows/python-package.yml/badge.svg)
 # gtfs-to-sqlite
 
 This project provides a tool to convert GTFS (General Transit Feed Specification) data to SQLite databases for local storage and usage in mobile or desktop applications.
