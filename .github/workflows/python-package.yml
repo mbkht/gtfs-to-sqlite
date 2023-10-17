@@ -37,17 +37,14 @@ jobs:
 
     # Check if the artifact already exists
     - name: Check if artifact exists
-      id: check_artifact
-      run: |
-        count=$(gh run list --workflow=python-package.yml | grep "completed" | wc -l)
-        echo "Completed runs: $count"
-        if [ $count -lt 1 ]; then
-          echo "::set-output name=exists::false"
-        else
-          echo "::set-output name=exists::true"
-        fi
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: rexdefuror/check_artifact_exists@v1.0.1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        owner: 'mbkht'
+        repo: 'gtfs-to-sqlite'
+        name: 'gtfs-data' ## without extension
+        
+    - run: echo "exists - ${{ env.ARTIFACT_EXISTS }}"
 
     # Download the file if artifact does not exist
     - name: Download gtfs.zip (if artifact doesn't exist)
