@@ -49,12 +49,12 @@ jobs:
 
     # Download the file if artifact does not exist
     - name: Download gtfs.zip (if artifact doesn't exist)
-      if: steps.check_artifact.outputs.exists == 'false'
+      if: env.ARTIFACT_EXISTS == 'false'
       run: wget -O gtfs.zip https://transport-data-gouv-fr-resource-history-prod.cellar-c2.services.clever-cloud.com/79374/79374.20230822.090932.391003.zip
 
     # Upload the file as an artifact if it was downloaded in the previous step
     - name: Upload gtfs.zip as artifact (if artifact doesn't exist)
-      if: steps.check_artifact.outputs.exists == 'false'
+      if: env.ARTIFACT_EXISTS == 'false'
       uses: actions/upload-artifact@v2
       with:
         name: gtfs-data
