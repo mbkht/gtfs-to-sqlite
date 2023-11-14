@@ -6,7 +6,7 @@ bs4~=0.0.1
 beautifulsoup4==4.12.2
 lxml~=4.9.2
 soupsieve==2.4.1
-pip==23.2.1
+pip==23.3
 wheel~=0.40.0
 cryptography==41.0.4
 cssselect==1.2.0
