@@ -35,36 +35,9 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-    # Check if the artifact already exists
-    - name: Check if artifact exists
-      id: check_artifact
-      uses: rexdefuror/check_artifact_exists@v1.0.1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        owner: 'mbkht'
-        repo: 'gtfs-to-sqlite'
-        name: 'gtfs-data' ## without extension
-        
-    - run: echo "${{ env.ARTIFACT_EXISTS }}"
-
-    # Download the file if artifact does not exist
-    - name: Download gtfs.zip (if artifact doesn't exist)
-      if: env.ARTIFACT_EXISTS == 'false'
+    # Download the file
+    - name: Download gtfs.zip
       run: wget -O gtfs.zip https://transport-data-gouv-fr-resource-history-prod.cellar-c2.services.clever-cloud.com/79374/79374.20230822.090932.391003.zip
-
-    # Upload the file as an artifact if it was downloaded in the previous step
-    - name: Upload gtfs.zip as artifact (if artifact doesn't exist)
-      if: env.ARTIFACT_EXISTS == 'false'
-      uses: actions/upload-artifact@v2
-      with:
-        name: gtfs-data
-        path: gtfs.zip
-
-    # Download the file from artifact storage
-    - name: Download gtfs.zip from artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: gtfs-data
 
     # Run tests
     - name: Test with pytest
